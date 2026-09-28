@@ -1,1 +1,1078 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WA HD Claim</title><style>*{box-sizing:border-box}body{margin:0;background:#090b10;color:#fff;font-family:Arial,sans-serif}.wrap{max-width:760px;margin:auto;padding:35px 18px}.card{background:#11151c;border:1px solid #252c37;border-radius:22px;padding:24px;margin-top:20px}h1{font-size:42px;margin:12px 0}p{color:#aab3c1;line-height:1.55}.drop{border:1px dashed #46505e;border-radius:18px;padding:42px 15px;text-align:center;cursor:pointer}button{border:0;border-radius:11px;padding:12px 17px;font-weight:700;cursor:pointer;margin:5px 3px}input{display:none}.barbg{height:9px;background:#242a33;border-radius:9px;overflow:hidden}.bar{height:100%;width:0;background:#fff}.claim{font-size:26px;font-weight:800;padding:16px;background:#090b10;border-radius:12px;word-break:break-all;margin:12px 0}.hidden{display:none}.status{margin:12px 0;color:#c3cad4}.green{color:#8ff0ae}</style></head><body><main class="wrap"><small>WHATSAPP VIDEO TOOL</small><h1>WA HD Claim</h1><p>Upload → proses → dapat kode claim → kirim ke bot WhatsApp.</p><section class="card"><div id="drop" class="drop"><div style="font-size:42px">📤</div><h2>Pilih video</h2><p>MP4/MOV/MKV · maksimal 100 MB</p><button id="pick">Pilih Video</button><input id="file" type="file" accept="video/*"></div><div id="work" class="hidden"><p id="name"></p><div class="barbg"><div id="bar" class="bar"></div></div><div id="status" class="status">Menunggu...</div></div><div id="result" class="hidden"><p class="green">✅ Video selesai diproses</p><div id="claim" class="claim"></div><button id="copy">Copy Claim</button><a id="dl"><button>Download</button></a><hr><h3>WhatsApp Bot</h3><p id="wastate">🔴 Offline</p><button id="start">Aktifkan Bot</button><p id="hint"></p></div></section></main><script>const $=id=>document.getElementById(id),file=$('file');$('pick').onclick=()=>file.click();$('drop').onclick=e=>{if(e.target.id!=='pick')file.click()};file.onchange=()=>file.files[0]&&upload(file.files[0]);async function upload(f){if(f.size>100*1024*1024)return alert('Maksimal 100 MB');$('drop').classList.add('hidden');$('work').classList.remove('hidden');$('name').textContent=f.name;$('status').textContent='Mengupload...';let fd=new FormData();fd.append('video',f);let x=new XMLHttpRequest();x.open('POST','/api/upload');x.upload.onprogress=e=>{if(e.lengthComputable){let n=Math.round(e.loaded/e.total*50);$('bar').style.width=n+'%';$('status').textContent='Mengupload '+Math.round(e.loaded/e.total*100)+'%'}};x.onload=()=>{if(x.status!==200)return $('status').textContent=x.responseText;let d=JSON.parse(x.responseText);$('bar').style.width='100%';$('status').textContent='Selesai';$('claim').textContent=d.claim;$('dl').href=d.downloadUrl;$('result').classList.remove('hidden')};x.onerror=()=>$('status').textContent='Koneksi gagal';x.send(fd)}$('copy').onclick=async()=>{await navigator.clipboard.writeText($('claim').textContent);$('copy').textContent='Copied!';setTimeout(()=>$('copy').textContent='Copy Claim',1000)};$('start').onclick=async()=>{ $('hint').textContent='Menyalakan worker...';let r=await fetch('/api/whatsapp/start',{method:'POST'});let d=await r.json();$('hint').textContent=d.ok?'Worker dinyalakan. Tunggu sampai Connected.':'Gagal menyalakan worker';poll()};async function poll(){let r=await fetch('/api/whatsapp/status');let d=await r.json();$('wastate').textContent=d.state==='connected'?'🟢 Connected':d.state==='starting'?'🟡 Connecting...':'🔴 Offline';if(d.state!=='connected')setTimeout(poll,3000)}</script></body></html>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>WA HD Claim</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top,
+          #18202c 0%,
+          #090c11 45%,
+          #06080c 100%
+        );
+
+      color: #ffffff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 760px;
+
+      margin: auto;
+
+      padding:
+        30px
+        18px
+        60px;
+    }
+
+    .badge {
+      display: inline-block;
+
+      padding:
+        7px
+        12px;
+
+      border-radius: 999px;
+
+      background: #171d27;
+
+      border:
+        1px solid #2b3442;
+
+      color: #aeb8c7;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      margin:
+        18px
+        0
+        10px;
+
+      font-size:
+        clamp(
+          38px,
+          9vw,
+          68px
+        );
+
+      line-height: 1;
+
+      letter-spacing:
+        -3px;
+    }
+
+    .subtitle {
+      color: #a7b0be;
+
+      font-size: 16px;
+
+      line-height: 1.6;
+
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background:
+        rgba(
+          18,
+          23,
+          31,
+          0.92
+        );
+
+      border:
+        1px solid #29313d;
+
+      border-radius: 24px;
+
+      padding: 20px;
+
+      box-shadow:
+        0 20px 70px
+        rgba(0,0,0,.35);
+    }
+
+    .upload-box {
+      border:
+        1px dashed #4a5667;
+
+      border-radius: 20px;
+
+      padding: 45px 18px;
+
+      text-align: center;
+
+      transition: .2s;
+
+      cursor: pointer;
+    }
+
+    .upload-box:hover {
+      border-color: #8b98aa;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          .025
+        );
+    }
+
+    .upload-icon {
+      font-size: 50px;
+
+      margin-bottom: 10px;
+    }
+
+    .upload-title {
+      font-size: 22px;
+
+      font-weight: bold;
+
+      margin-bottom: 8px;
+    }
+
+    .upload-info {
+      color: #8e98a7;
+
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    button {
+      border: 0;
+
+      border-radius: 12px;
+
+      padding:
+        13px
+        18px;
+
+      font-size: 14px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      background: #ffffff;
+
+      color: #090b10;
+
+      transition: .15s;
+    }
+
+    button:hover {
+      transform:
+        translateY(-1px);
+
+      opacity: .9;
+    }
+
+    button.secondary {
+      background: #202733;
+
+      color: white;
+
+      border:
+        1px solid #333e4d;
+    }
+
+    button.whatsapp {
+      background: #25d366;
+
+      color: #061108;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .file-name {
+      color: #cbd3df;
+
+      margin:
+        5px
+        0
+        15px;
+
+      word-break: break-all;
+    }
+
+    .progress-background {
+      width: 100%;
+
+      height: 10px;
+
+      background: #252c37;
+
+      border-radius: 999px;
+
+      overflow: hidden;
+    }
+
+    .progress {
+      width: 0%;
+
+      height: 100%;
+
+      background: #ffffff;
+
+      transition: width .2s;
+    }
+
+    .status {
+      margin-top: 12px;
+
+      color: #aeb7c4;
+
+      font-size: 14px;
+    }
+
+    .result {
+      margin-top: 22px;
+
+      padding-top: 22px;
+
+      border-top:
+        1px solid #29313d;
+    }
+
+    .success {
+      color: #73e6a0;
+
+      font-weight: bold;
+    }
+
+    .claim {
+      margin:
+        14px
+        0;
+
+      padding: 18px;
+
+      background: #080b10;
+
+      border:
+        1px solid #2a323f;
+
+      border-radius: 14px;
+
+      font-size: 25px;
+
+      font-weight: 800;
+
+      letter-spacing: 1px;
+
+      word-break: break-all;
+
+      text-align: center;
+    }
+
+    .actions {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 8px;
+    }
+
+    .actions a {
+      text-decoration: none;
+    }
+
+    .wa-panel {
+      margin-top: 25px;
+
+      padding:
+        18px;
+
+      border:
+        1px solid #29313d;
+
+      background:
+        #0c1016;
+
+      border-radius: 16px;
+    }
+
+    .wa-title {
+      font-size: 17px;
+
+      font-weight: bold;
+
+      margin-bottom: 8px;
+    }
+
+    .wa-status {
+      color: #aeb7c4;
+
+      margin:
+        10px
+        0
+        15px;
+    }
+
+    .instruction {
+      margin-top: 15px;
+
+      padding:
+        14px;
+
+      border-radius: 12px;
+
+      background:
+        #151b24;
+
+      color: #b9c2cf;
+
+      line-height: 1.6;
+
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+
+      color: #626c7a;
+
+      margin-top: 25px;
+
+      font-size: 12px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <div class="badge">
+      WHATSAPP VIDEO TOOL
+    </div>
+
+    <h1>
+      WA HD Claim
+    </h1>
+
+    <div class="subtitle">
+      Upload video → proses → dapatkan
+      kode claim → kirim ke WhatsApp Bot.
+    </div>
+
+    <section class="card">
+
+      <!-- UPLOAD -->
+
+      <div
+        id="uploadBox"
+        class="upload-box"
+      >
+
+        <div class="upload-icon">
+          📤
+        </div>
+
+        <div class="upload-title">
+          Upload Video
+        </div>
+
+        <div class="upload-info">
+          MP4 / MOV / MKV
+          <br>
+          Maksimal 100 MB
+        </div>
+
+        <button
+          type="button"
+          id="chooseButton"
+        >
+          Pilih Video
+        </button>
+
+        <input
+          id="videoInput"
+          type="file"
+          accept="video/*"
+        >
+
+      </div>
+
+      <!-- PROCESSING -->
+
+      <div
+        id="processing"
+        class="hidden"
+      >
+
+        <div class="file-name">
+          <strong>File:</strong>
+          <span id="fileName">
+            -
+          </span>
+        </div>
+
+        <div class="progress-background">
+
+          <div
+            id="progress"
+            class="progress"
+          ></div>
+
+        </div>
+
+        <div
+          id="status"
+          class="status"
+        >
+          Menunggu...
+        </div>
+
+      </div>
+
+      <!-- RESULT -->
+
+      <div
+        id="result"
+        class="result hidden"
+      >
+
+        <div class="success">
+          ✓ Video selesai diproses
+        </div>
+
+        <div
+          id="claimCode"
+          class="claim"
+        >
+          .claimXXXXXXXX
+        </div>
+
+        <div class="actions">
+
+          <button
+            id="copyButton"
+            type="button"
+          >
+            Copy Claim
+          </button>
+
+          <a
+            id="downloadLink"
+            href="#"
+          >
+
+            <button
+              class="secondary"
+              type="button"
+            >
+              Download
+            </button>
+
+          </a>
+
+        </div>
+
+        <!-- WHATSAPP -->
+
+        <div class="wa-panel">
+
+          <div class="wa-title">
+            WhatsApp Bot
+          </div>
+
+          <div
+            id="waStatus"
+            class="wa-status"
+          >
+            🔴 Bot belum aktif
+          </div>
+
+          <button
+            id="activateButton"
+            class="whatsapp"
+            type="button"
+          >
+            Aktifkan Bot
+          </button>
+
+          <div
+            id="instruction"
+            class="instruction hidden"
+          >
+            Setelah bot terhubung,
+            buka WhatsApp dan kirim kode
+            <strong>claim</strong> di atas
+            ke nomor bot.
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="footer">
+      WA HD Claim
+    </div>
+
+  </main>
+
+  <script>
+
+    const videoInput =
+      document.getElementById(
+        "videoInput"
+      );
+
+    const chooseButton =
+      document.getElementById(
+        "chooseButton"
+      );
+
+    const uploadBox =
+      document.getElementById(
+        "uploadBox"
+      );
+
+    const processing =
+      document.getElementById(
+        "processing"
+      );
+
+    const result =
+      document.getElementById(
+        "result"
+      );
+
+    const fileName =
+      document.getElementById(
+        "fileName"
+      );
+
+    const progress =
+      document.getElementById(
+        "progress"
+      );
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+    const claimCode =
+      document.getElementById(
+        "claimCode"
+      );
+
+    const copyButton =
+      document.getElementById(
+        "copyButton"
+      );
+
+    const downloadLink =
+      document.getElementById(
+        "downloadLink"
+      );
+
+    const activateButton =
+      document.getElementById(
+        "activateButton"
+      );
+
+    const waStatus =
+      document.getElementById(
+        "waStatus"
+      );
+
+    const instruction =
+      document.getElementById(
+        "instruction"
+      );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILE PICKER
+    |--------------------------------------------------------------------------
+    */
+
+    chooseButton.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        videoInput.click();
+
+      }
+    );
+
+    uploadBox.addEventListener(
+      "click",
+      () => {
+
+        videoInput.click();
+
+      }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILE SELECTED
+    |--------------------------------------------------------------------------
+    */
+
+    videoInput.addEventListener(
+      "change",
+      () => {
+
+        const file =
+          videoInput.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        uploadVideo(file);
+
+      }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPLOAD
+    |--------------------------------------------------------------------------
+    */
+
+    function uploadVideo(file) {
+
+      const maxSize =
+        100 * 1024 * 1024;
+
+      if (file.size > maxSize) {
+
+        alert(
+          "Ukuran video maksimal 100 MB."
+        );
+
+        return;
+      }
+
+      uploadBox.classList.add(
+        "hidden"
+      );
+
+      processing.classList.remove(
+        "hidden"
+      );
+
+      fileName.textContent =
+        file.name;
+
+      status.textContent =
+        "Mengupload video...";
+
+      progress.style.width =
+        "0%";
+
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "video",
+        file
+      );
+
+
+      const xhr =
+        new XMLHttpRequest();
+
+      xhr.open(
+        "POST",
+        "/api/upload"
+      );
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | UPLOAD PROGRESS
+      |--------------------------------------------------------------------------
+      */
+
+      xhr.upload.onprogress =
+        event => {
+
+          if (
+            !event.lengthComputable
+          ) {
+            return;
+          }
+
+          const percent =
+            Math.round(
+              (
+                event.loaded /
+                event.total
+              ) * 50
+            );
+
+          progress.style.width =
+            percent + "%";
+
+          status.textContent =
+            `Mengupload ${Math.round(
+              event.loaded /
+              event.total *
+              100
+            )}%...`;
+
+        };
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | RESPONSE
+      |--------------------------------------------------------------------------
+      */
+
+      xhr.onload =
+        () => {
+
+          if (
+            xhr.status !== 200
+          ) {
+
+            let message =
+              "Gagal memproses video.";
+
+            try {
+
+              const data =
+                JSON.parse(
+                  xhr.responseText
+                );
+
+              message =
+                data.message ||
+                message;
+
+            } catch {}
+
+            status.textContent =
+              message;
+
+            return;
+          }
+
+
+          try {
+
+            const data =
+              JSON.parse(
+                xhr.responseText
+              );
+
+
+            if (!data.ok) {
+
+              status.textContent =
+                data.message ||
+                "Gagal.";
+
+              return;
+            }
+
+
+            progress.style.width =
+              "100%";
+
+            status.textContent =
+              "Video berhasil diproses.";
+
+
+            claimCode.textContent =
+              data.claim;
+
+
+            downloadLink.href =
+              data.downloadUrl;
+
+
+            result.classList.remove(
+              "hidden"
+            );
+
+
+            checkWhatsAppStatus();
+
+
+          } catch (error) {
+
+            console.error(error);
+
+            status.textContent =
+              "Response server tidak valid.";
+
+          }
+
+        };
+
+
+      xhr.onerror =
+        () => {
+
+          status.textContent =
+            "Koneksi ke server gagal.";
+
+        };
+
+
+      xhr.send(
+        formData
+      );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | COPY CLAIM
+    |--------------------------------------------------------------------------
+    */
+
+    copyButton.addEventListener(
+      "click",
+      async () => {
+
+        const claim =
+          claimCode.textContent;
+
+        try {
+
+          await navigator
+            .clipboard
+            .writeText(claim);
+
+          copyButton.textContent =
+            "✓ Copied";
+
+          setTimeout(
+            () => {
+
+              copyButton.textContent =
+                "Copy Claim";
+
+            },
+            1500
+          );
+
+        } catch {
+
+          alert(
+            "Gagal menyalin. Silakan copy manual."
+          );
+
+        }
+
+      }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACTIVATE WHATSAPP
+    |--------------------------------------------------------------------------
+    */
+
+    activateButton.addEventListener(
+      "click",
+      async () => {
+
+        activateButton.disabled =
+          true;
+
+        activateButton.textContent =
+          "Mengaktifkan...";
+
+        waStatus.textContent =
+          "🟡 Menghubungkan WhatsApp...";
+
+
+        try {
+
+          const response =
+            await fetch(
+              "/api/whatsapp/start",
+              {
+                method: "POST"
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (!data.ok) {
+
+            throw new Error(
+              data.message ||
+              "Gagal mengaktifkan bot."
+            );
+
+          }
+
+
+          checkWhatsAppStatus();
+
+
+        } catch (error) {
+
+          console.error(error);
+
+          waStatus.textContent =
+            "🔴 Gagal mengaktifkan bot.";
+
+          activateButton.disabled =
+            false;
+
+          activateButton.textContent =
+            "Aktifkan Bot";
+
+        }
+
+      }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECK WHATSAPP STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    async function checkWhatsAppStatus() {
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/whatsapp/status"
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          data.state ===
+          "connected"
+        ) {
+
+          waStatus.textContent =
+            "🟢 WhatsApp Bot Connected";
+
+          activateButton.textContent =
+            "Bot Aktif";
+
+          activateButton.disabled =
+            true;
+
+          instruction.classList.remove(
+            "hidden"
+          );
+
+          return;
+        }
+
+
+        if (
+          data.state ===
+          "starting"
+        ) {
+
+          waStatus.textContent =
+            "🟡 Menghubungkan WhatsApp...";
+
+          setTimeout(
+            checkWhatsAppStatus,
+            3000
+          );
+
+          return;
+        }
+
+
+        waStatus.textContent =
+          "🔴 Bot Offline";
+
+        activateButton.disabled =
+          false;
+
+        activateButton.textContent =
+          "Aktifkan Bot";
+
+      } catch (error) {
+
+        console.error(error);
+
+        waStatus.textContent =
+          "⚠️ Status bot tidak dapat dicek.";
+
+      }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INITIAL STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    checkWhatsAppStatus();
+
+  </script>
+
+</body>
+
+</html>
